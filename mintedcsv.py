@@ -1,4 +1,3 @@
-from pprint import pprint
 import csv
 from dataclasses import dataclass
 from scourgify import normalize_address_record
@@ -14,6 +13,19 @@ class AddressLine:
     postal_code: int
     email: str
     country: str = "USA"
+
+    def to_output_dict(self) -> dict[str, str]:
+        return {
+            "Name on Envelope": ' & '.join(self.attendees),
+            "Street Address 1": self.street_address_1,
+            "Street Address 2 (Optional)": self.street_address_2 or "",
+            "City": self.city,
+            "State/Region": self.state,
+            "Zip/Postal Code": str(self.postal_code),
+            "Country": self.country,
+            "Email (Optional)": self.email,
+            "Phone (Optional)": "",
+        }
 
 
 NAME = "Name"
@@ -65,30 +77,10 @@ def parse_csv(reader: csv.DictReader) -> list[AddressLine]:
 
 def write_address_lines(address_lines: list[AddressLine], filename: str):
     with open(filename, 'w') as fileout:
-        writer = csv.DictWriter(fileout, fieldnames=[
-            "Name on Envelope",
-            "Street Address 1",
-            "Street Address 2 (Optional)",
-            "City",
-            "State/Region",
-            "Zip/Postal Code",
-            "Country",
-            "Email (Optional)",
-            "Phone (Optional)",
-        ])
+        writer = csv.DictWriter(fileout, fieldnames=address_lines[0].to_output_dict().keys())
         writer.writeheader()
         for address_line in address_lines:
-            writer.writerow({
-                "Name on Envelope": ' & '.join(address_line.attendees),
-                "Street Address 1": address_line.street_address_1,
-                "Street Address 2 (Optional)": address_line.street_address_2 or "",
-                "City": address_line.city,
-                "State/Region": address_line.state,
-                "Zip/Postal Code": address_line.postal_code,
-                "Country": address_line.country,
-                "Email (Optional)": address_line.email,
-                "Phone (Optional)": "",
-            })
+            writer.writerow(address_line.to_output_dict())
 
 
 if __name__ == "__main__":
