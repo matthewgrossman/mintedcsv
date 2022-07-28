@@ -72,6 +72,7 @@ def parse_csv(reader: csv.DictReader) -> list[AddressLine]:
                 postal_code=address["postal_code"],
                 email=row[EMAIL]
             )
+    address_lines.append(last_address_line)
     return address_lines
 
 
