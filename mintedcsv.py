@@ -62,7 +62,7 @@ def parse_csv(reader: csv.DictReader) -> list[AddressLine]:
             if last_address_line is not None:
                 address_lines.append(last_address_line)
 
-            address = normalize_address_record(row[ADDRESS])
+            address = normalize_address_record(row[ADDRESS].replace("\n", ","))
             last_address_line = AddressLine(
                 attendees=[row[NAME]],
                 street_address_1=address["address_line_1"],
@@ -85,9 +85,14 @@ def write_address_lines(address_lines: list[AddressLine], filename: str):
 
 
 if __name__ == "__main__":
-    csvs = ["Guests - Friends.tsv"]
+    csvs = [
+        "Guests - Fam Friends.csv",
+        "Guests - Family MG.csv",
+        "Guests - Family RG.csv",
+        "Guests - Friends.csv",
+    ]
+    address_lines: list[AddressLine] = []
     for sheet_name in csvs:
-        address_lines: list[AddressLine] = []
         with open(sheet_name) as sheet_file:
             dialect = csv.Sniffer().sniff(sheet_file.read(1024))
             sheet_file.seek(0)
