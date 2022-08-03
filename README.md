@@ -1,4 +1,7 @@
 # mintedcsv
+Convert our existing wedding spreadsheet to the format that [minted](https://www.minted.com/) expects
+
+### Running
 Ensure you have downloaded each sheet's csv in the directory:
 ```python
     csvs = [
@@ -9,7 +12,6 @@ Ensure you have downloaded each sheet's csv in the directory:
     ]
 ```
 
-### Running
 ```bash
 poetry run python mintedcsv.py && open output.csv
 ```
