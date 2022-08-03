@@ -1,5 +1,6 @@
 import csv
 from dataclasses import dataclass
+
 from scourgify import normalize_address_record
 
 
@@ -16,7 +17,7 @@ class AddressLine:
 
     def to_output_dict(self) -> dict[str, str]:
         return {
-            "Name on Envelope": ' & '.join(self.attendees),
+            "Name on Envelope": " & ".join(self.attendees),
             "Street Address 1": self.street_address_1,
             "Street Address 2 (Optional)": self.street_address_2 or "",
             "City": self.city,
@@ -36,19 +37,19 @@ ADDRESS = "Address"
 
 def parse_csv(reader: csv.DictReader) -> list[AddressLine]:
     address_lines: list[AddressLine] = []
-
     last_address_line: AddressLine | None = None
     for row in reader:
 
         # sanitize the fields
         row = {k: v.strip() for k, v in row.items()}
 
-        # skip incomplete rows
-        if not row.get(ADDRESS):
-            continue
-
         # skip maybes
         if row[CERTAINTY] != "Yes":
+            continue
+
+        # skip incomplete rows
+        if not row.get(ADDRESS):
+            print(f"Skipping {row[NAME]} with blank address")
             continue
 
         # bundle up "--" to the row above
@@ -56,6 +57,7 @@ def parse_csv(reader: csv.DictReader) -> list[AddressLine]:
             last_address_line.attendees.append(row[NAME])
             continue
 
+        # create a new AddressLine
         if last_address_line is None or row[ADDRESS] != "—":
 
             # flush out the last_address_line
@@ -70,15 +72,20 @@ def parse_csv(reader: csv.DictReader) -> list[AddressLine]:
                 city=address["city"],
                 state=address["state"],
                 postal_code=address["postal_code"],
-                email=row[EMAIL]
+                email=row[EMAIL],
             )
+    if last_address_line is None:
+        raise Exception("No AddressLines created for sheet")
+
     address_lines.append(last_address_line)
     return address_lines
 
 
 def write_address_lines(address_lines: list[AddressLine], filename: str):
-    with open(filename, 'w') as fileout:
-        writer = csv.DictWriter(fileout, fieldnames=address_lines[0].to_output_dict().keys())
+    with open(filename, "w") as fileout:
+        writer = csv.DictWriter(
+            fileout, fieldnames=address_lines[0].to_output_dict().keys()
+        )
         writer.writeheader()
         for address_line in address_lines:
             writer.writerow(address_line.to_output_dict())
@@ -86,10 +93,10 @@ def write_address_lines(address_lines: list[AddressLine], filename: str):
 
 if __name__ == "__main__":
     csvs = [
-        "Guests - Fam Friends.csv",
-        "Guests - Family MG.csv",
         "Guests - Family RG.csv",
+        "Guests - Family MG.csv",
         "Guests - Friends.csv",
+        "Guests - Fam Friends.csv",
     ]
     address_lines: list[AddressLine] = []
     for sheet_name in csvs:
@@ -99,3 +106,5 @@ if __name__ == "__main__":
             reader = csv.DictReader(sheet_file, dialect=dialect)
             address_lines.extend(parse_csv(reader))
     write_address_lines(address_lines, "output.csv")
+    print(f"Number of address lines: {len(address_lines)}")
+    print(f"Number of people: {sum(len(a.attendees) for a in address_lines)}")

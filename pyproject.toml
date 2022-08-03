@@ -12,6 +12,7 @@ usaddress-scourgify = "^0.2.4"
 black = "^22.6.0"
 ipdb = "^0.13.9"
 mypy = "^0.971"
+reorder-python-imports = "^3.8.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
