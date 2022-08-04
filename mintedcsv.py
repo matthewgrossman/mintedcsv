@@ -11,7 +11,7 @@ class AddressLine:
     street_address_2: str
     city: str
     state: str
-    postal_code: int
+    postal_code: str
     email: str
     country: str = "USA"
 
@@ -22,7 +22,7 @@ class AddressLine:
             "Street Address 2 (Optional)": self.street_address_2 or "",
             "City": self.city,
             "State/Region": self.state,
-            "Zip/Postal Code": str(self.postal_code),
+            "Zip/Postal Code": self.postal_code,
             "Country": self.country,
             "Email (Optional)": self.email,
             "Phone (Optional)": "",
