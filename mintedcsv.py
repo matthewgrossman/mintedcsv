@@ -17,15 +17,14 @@ class AddressLine:
 
     def to_output_dict(self) -> dict[str, str]:
         return {
-            "Name on Envelope": " & ".join(self.attendees),
+            "Guest name (required)": " & ".join(self.attendees),
+            "Phone number": "",
+            "Email (Optional)": self.email,
             "Street Address 1": self.street_address_1,
             "Street Address 2 (Optional)": self.street_address_2 or "",
             "City": self.city,
             "State/Region": self.state,
             "Zip/Postal Code": self.postal_code,
-            "Country": self.country,
-            "Email (Optional)": self.email,
-            "Phone (Optional)": "",
         }
 
 
@@ -64,7 +63,17 @@ def parse_csv(reader: csv.DictReader) -> list[AddressLine]:
             if last_address_line is not None:
                 address_lines.append(last_address_line)
 
-            address = normalize_address_record(row[ADDRESS].replace("\n", ","))
+            try:
+                address = normalize_address_record(row[ADDRESS].replace("\n", ","))
+            except:
+                # we don't care about addresses for RSVPs
+                address = {
+                    "address_line_1": "",
+                    "address_line_2": "",
+                    "city": "",
+                    "state": "",
+                    "postal_code": "",
+                }
             last_address_line = AddressLine(
                 attendees=[row[NAME]],
                 street_address_1=address["address_line_1"],
